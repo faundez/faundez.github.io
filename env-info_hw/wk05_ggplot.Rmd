@@ -133,8 +133,6 @@ You'll join the [population](http://data.okfn.org/data/core/population) dataset 
 
 _**Task**. Calculate the per capita emissions by country (not World or EU28) and return the top 5 emitting countries for **2014**._
 
-_**Task**. Summarize the per capita emissions by country (not World or EU28) as the mean (ie average)  value across all years and return the top 5 emitting countries._ 
-
 ```{r read co2 & popn}
 library(readr)
 library(readxl) # install.packages('readxl')
@@ -158,6 +156,7 @@ if (!file.exists(out)) writeBin(content(GET(url), 'raw'), out)
 # read in carbon dioxide emissions file
 xls = 'co2_europa.xls'
 co2 = read_excel(xls, skip=12)
+# to match names use anti-join  
 
 # get lookup table to translate some country names in popn to those in co2 table
 cntry = read_csv('co2_country_to_popn.csv')
@@ -166,7 +165,7 @@ cntry = read_csv('co2_country_to_popn.csv')
 popn = read_csv('https://raw.githubusercontent.com/datasets/population/master/data/population.csv') %>%
   select(country=`Country Name`, year=Year, popn=Value) %>%
   mutate(
-    country = plyr::revalue(
+    country = plyr::revalue( #revalue country with any matches between countries
       country, 
       setNames(cntry$country_co2, cntry$country_popn)))
 ```
@@ -205,8 +204,6 @@ names(pop_2014)[1]<-paste("Country") #changing the name in the first column from
 ```{r}
 Per_Capita = left_join(co2_2014, pop_2014, by = "Country")
 
-print(getwd())
-
 co2_percapita = mutate(Per_Capita, ratio = n / popn)
 
 arrange(co2_percapita, desc(ratio))
@@ -222,8 +219,6 @@ suppressWarnings(suppressMessages(library(dplyr)))
 suppressWarnings(suppressMessages(library(tidyr)))
 suppressWarnings(suppressMessages(library(ggplot2)))
 suppressWarnings(suppressMessages(library(knitr)))
-suppressWarnings(suppressMessages(library(rworldmap)))
-suppressWarnings(suppressMessages(library(ggmap)))
 
 ```
 
@@ -234,3 +229,46 @@ ggplot(data=co2_percapita, aes(y=ratio, x=Country))+geom_point()
 ```{r}
 ggplot(data=co2_percapita, aes(y=n, x=Country))+geom_point()
 ```
+
+_**Task**. Summarize the per capita emissions by country (not World or EU28) as the mean (ie average)  value across all years and return the top 5 emitting countries._ 
+
+```{r}
+e
+ee = filter(e, Country != c("World", "EU28"))
+
+names(popn)[1]<-paste("Country")
+popn
+
+allyears = left_join(ee, popn, by = c("Country", "year"))
+allyears
+
+pc_allyears = mutate(allyears, ratio = n / popn)
+pc_allyears
+
+n = pc_allyears %>% select(Country, ratio)
+
+n <- n[!is.na(n$ratio), ]
+
+n <- aggregate(n$ratio, by = list(n$Country), FUN = mean)
+names(n) <- c("Country", "mean")
+m = arrange(n, desc(mean))
+head(m)
+   
+```
+
+#I tried dplyr but make me this error
+
+> n %>% group_by(Country)%>%
++ summarise(
++ mean = mean(ratio))%>%
++ write_csv("x")
+Error in mean(ratio) : object 'ratio' not found
+> head(x)
+Error in head(x) : object 'x' not found
+
+n %>% group_by(Country)%>% 
+  summarise(
+    mean = mean(ratio))%>% 
+    write_csv("x")
+    head(x)
+ 

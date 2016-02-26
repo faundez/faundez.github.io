@@ -1,0 +1,95 @@
+---
+title: "wk06_widgets"
+author: "Patricia Faundez"
+date: "February 12, 2016"
+output: html_document
+---
+
+### setup
+
+Ensure that you're in the same working directory `env-info_hw` when you Knit HTML as when you test code in the Console.
+
+```{r setwd env-info_hw, eval=FALSE}
+wd = 'env-info_hw'
+
+# set working directory for Console (vs Rmd)
+if (wd %in% list.files() & interactive()){
+    setwd(wd)
+}
+
+# ensure working directory
+if (basename(getwd()) != wd){
+  stop(sprintf("WHOAH! Your working directory is not in '%s'!\n   getwd(): %s", wd, getwd()))
+
+}
+
+# set default eval option for R code chunks
+#knitr::opts_chunk$set(eval=FALSE)
+```
+
+
+### `manipulate`
+
+
+**Task.** Add another R chunk with a slider adjusting the number of bins from 5 to 50, with step increments of 5.
+
+
+```{r manipulate, eval=F}
+library(manipulate) # install.packages('manipulate')
+
+manipulate({
+  
+  faithful %>%
+    ggplot(aes(eruptions)) + 
+    geom_histogram(aes(y = ..density..),  bins = 20) +
+    geom_density(color='blue', size=2, adjust=a) +
+    xlab('duration (minutes)') +
+    ylab('frequency density') +
+    ggtitle('geyser eruption duration')
+  
+}, a = slider(min = 5, max = 50, initial = 5, label = 'bandwidth adjustment', step = 5))
+```
+
+
+
+### `ggvis`
+
+
+**Task.** Add another R chunk that only applies the `add_tooltip` on mouse click.
+
+```{r}
+library(dplyr)
+library(ggvis)
+cars = mtcars %>%
+  add_rownames('model') %>%        # dplyr drops rownames
+  mutate(id = row_number())       # add an id column to use ask the key
+
+all_values <- function(x) {
+  if(is.null(x)) return(NULL)
+  row <- cars[cars$id == x$id, ]
+  paste0(names(row), ": ", format(row), collapse = "<br/>")
+}
+
+cars %>% 
+  ggvis(x = ~wt, y = ~mpg, key := ~id) %>%
+  layer_points() %>%
+  add_tooltip(all_values, 'click')
+```
+
+
+## htmlwidgets
+
+
+**Task.** Output the table again with `datatable` and set the `options` to have `pagelength` of just 5 rows. (See `?datatable` and <http://rstudio.github.io/DT/>).
+
+```{r}
+library(dplyr)
+library(knitr) # install.packages('kable')
+library(DT) # install.packages('DT')
+datatable(iris)
+
+# remove document elements
+datatable(iris, options = list(pageLength = 5))
+```
+
+

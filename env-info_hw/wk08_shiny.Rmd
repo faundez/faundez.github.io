@@ -6,26 +6,24 @@ output: html_document
 runtime: shiny
 ---
 
-```{r,  eval=F}
-
-shiny::runGitHub('faundez.github.io/env-info_hw/', 'faundez')
-#runGitHub("wk08_shiny", "faundez", subdir = "faundez.github.io/env-info_hw/")
-
-library(shiny)
-
-ui <- fluidPage(
- sliderInput(inputId = "num",
- label = "Choose a number",
- value = 25, min = 1, max = 100),
- plotOutput("hist")
+```{r, echo = FALSE}
+shinyApp(
+  
+  ui = fluidPage(
+    selectInput("region", "Region:", 
+                choices = colnames(WorldPhones)),
+    plotOutput("phonePlot")
+  ),
+  
+  server = function(input, output) {
+    output$phonePlot <- renderPlot({
+      barplot(WorldPhones[,input$region]*1000, 
+              ylab = "Number of Telephones", xlab = "Year")
+    })
+  },
+  
+  options = list(height = 500)
 )
-server <- function(input, output) {
- output$hist <- renderPlot({
- hist(rnorm(input$num))
- })
-}
-shinyApp(ui = ui, server = server)
-
-
 ```
+
 

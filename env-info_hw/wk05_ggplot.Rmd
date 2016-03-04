@@ -5,33 +5,6 @@ date: "February 5, 2016"
 output: html_document
 ---
 
-
-```{r setup, echo=F}
-# NOTE: This chunk sets the default to eval=F for all following chunks.
-#       Am just using this for instructions. Please exclude in your assignment to see all results.
-#knitr::opts_chunk$set(eval=FALSE)
-```
-
-
-### RStudio Shortcuts
-
-- [rstudio-IDE-cheatsheet.pdf](./refs/cheatsheets/rstudio-IDE-cheatsheet.pdf)
-    - Show Keyboard Shortcuts `?`: Alt+Shift+**K** (Win), Option+Shift+**K** (Mac)
-    - (Un)Comment lines `# `: Ctrl+Shift+**C** (Win), Cmd+Shift+**C** (Mac)
-    - Insert `%>%`: Ctrl+Shift+**M** (Win), Cmd+Shift+**M** (Mac)
-    - Attempt completion: **Tab** or Ctrl+Space (Win), **Tab** or Cmd+Space (Mac), 
-    - Knit Document: Ctrl+Shift+**K** (Win), Cmd+Shift+**K** (Mac)
-    - Copy Lines Up/Down: Shift+Alt+**$\uparrow$**/**$\downarrow$** (Win), Cmd+Option+**$\uparrow$**/**$\downarrow$** (Mac)
-
-
-### Individual Assignment `wk05_ggplot`
-
-## joining data
-
-### setup
-
-Ensure that you're in the same working directory `env-info_hw` when you Knit HTML as when you test code in the Console.
-
 ```{r setwd students}
 wd = 'env-info_hw'
 
@@ -46,86 +19,268 @@ if (basename(getwd()) != wd){
 }
 ```
 
-### `bind_cols`
+#Metadata thin.txt
 
-```{r bind_cols}
+"varname" "descrip"
+"1" "startyear" "year of thin"
+"2" "thin" "percent canopy removed"
+"3" "postyears" "years since thinnning"
+"4" "day" "current day"
+"5" "month" "current month"
+"6" "trans" "transpiration (mm/day)"
+"7" "evap" "evaporation (mm/day)"
+"8" "lai" "Leaf Area"
+"9" "psn" "Photosynthesis (gC/m2/day)"
+"10" "cpool" "Non Structural Carbohydrate (gC/m2)"
+"11" "plantc" "Total Biomass (kgC/m2)"
+"12" "year" "year"
+
+```{r}
+getwd()
+
+library(readr)
+library(readxl) # install.packages('readxl')
+library(tidyr)
+library(httr)   # install.packages('httr')
+#library(plyr)   # install.packages('plyr')
 library(dplyr)
-y = data.frame(
-  x1 = c('A','B','C'), 
-  x2 = c( 1 , 2 , 3), 
-  stringsAsFactors=F)
-z = data.frame(
-  x1 = c('B','C','D'), 
-  x2 = c( 2 , 3 , 4), 
-  stringsAsFactors=F)
-y
+library(ggplot2) 
+library(knitr)       # functions for knitting Rmd documents to html
+library(RColorBrewer)
+library(gridExtra)
+
+
+```
+
+#Everything in http://docs.ggplot2.org/current/
+
+#Questions in Chunks: 3,19,42
+
+#my task I explored Aesthetics, Lines specified by slope and intercept, geom_abline: slope and intercept
+
+#Comparing Biomass with other variables
+```{r}
+thin <- read_csv("~/Winter_2016/Environmental_Informatics/faundez.github.io/env-info_hw/thin.csv")
+#scatter plot Biomass v/s Thinning
+p1=ggplot(thin, aes(x=plantc, y=thin))+geom_point(col="brown", shape=1, size=rel(1))
+#How does Biomass and Thinning is compare
+p1=p1+labs(x="Biomass", y="Thinning") 
+  p1 = p1+ ggtitle("How does Biomass and Thinning compare")
+#coef(lm(thin ~ plantc, data = thin)) # Calculate slope and intercept of line of best fit
+#p1 + geom_smooth(method = "lm", se = FALSE)                                  #NOT WORKING ????
+p1 = p1 + geom_abline(intercept=73.59,slope=-11.08, colour="black", size=1)
+p1
+```
+
+
+```{r}
+#scatter plot Biomass v/s photosyntesis
+p2=ggplot(thin, aes(x=plantc, y=psn))+geom_point(col="blue", shape=1, size=rel(1))
+p2
+#How does Biomass and Photosyntes is compare
+p2=p2+labs(x="Biomass", y="Photosyntesis") 
+  p2 = p2+ ggtitle("How does Biomass and Photosyntesis compare")
+#coef(lm(psn ~ plantc, data = thin)) # Calculate slope and intercept of line of best fit
+  p2 = p2 + geom_abline(intercept=-0.001,slope=0.0008, colour="black", size=1)
+p2
+```
+
+```{r}
+#how does Leaf Area and Biomass compare
+#scatter plot Leaf Area v/s Biomass
+p3=ggplot(thin, aes(x=plantc, y=lai))+geom_point(col="green", shape=1, size=rel(1))
+p3=p3+labs(x="Biomass", y="Leaf Area") 
+  p3 = p3+ ggtitle("How does Biomass and Leaf Area compare")
+#coef(lm(lai ~ plantc, data = thin)) # Calculate slope and intercept of line of best fit
+p3 = p3 + geom_abline(intercept=-1.5,slope=1.34, colour="black", size=1)
+p3
+ 
+
+
+```
+
+```{r}
+#scatter plot Biomass v/s Transpiration
+p4=ggplot(thin, aes(x=plantc, y=trans))+geom_point(col="orange", shape=1, size=rel(1))
+#How does Biomass and Transpiration is compare
+p4=p4+labs(x="Biomass", y="Transpiration") 
+  p4 = p4+ ggtitle("How does Biomass and Transpiration compare")
+#coef(lm(trans ~ plantc, data = thin)) # Calculate slope and intercept of line of best fit
+  p4 = p4 + geom_abline(intercept=-1.337,slope=0.67, colour="black", size=1)
+p4
+```
+
+```{r}
+#scatter plot Biomass v/s Evaporation
+p5=ggplot(thin, aes(x=plantc, y=evap))+geom_point(col="orange", shape=1, size=rel(1))
+#How does Biomass and Evaporation is compare
+p5=p5+labs(x="Biomass", y="Evaporation") 
+  p5 = p5+ ggtitle("How does Biomass and Evaporation compare")
+#coef(lm(evap ~ plantc, data = thin)) # Calculate slope and intercept of line of best fit
+  p5 = p5 + geom_abline(intercept=0.14,slope=-0.019, colour="black", size=1)
+p5
+```
+
+```{r}
+grid.arrange(p1,p2,p3,p4,p5)
+```
+
+#Comparing Biomass with other variables
+```{r}
+#scatter plot Non Structural Carbohydrate v/s Thinning
+a1=ggplot(thin, aes(x=cpool, y=thin))+geom_point(col="brown", shape=1, size=rel(1))
+#How does Non Structural Carbohydrate and Thinning is compare
+a1=a1+labs(x="Non Structural Carbohydrate", y="Thinning") 
+  a1 = a1+ ggtitle("How does Non Structural Carbohydrate and Thinning compare")
+#coef(lm(thin ~ cpool, data = thin)) # Calculate slope and intercept of line of best fit
+  a1 = a1 + geom_abline(intercept=39.7,slope=-25.4, colour="black", size=1)
+a1
+```
+
+
+```{r}
+#scatter plot Non Structural Carbohydrate v/s photosyntesis
+a2=ggplot(thin, aes(x=cpool, y=psn))+geom_point(col="blue", shape=1, size=rel(1))
+#How does Non Structural Carbohydrate and Photosyntes is compare
+a2=a2+labs(x="Non Structural Carbohydrate", y="Photosyntesis") 
+  a2 = a2+ ggtitle("How does Non Structural Carbohydrate and Photosyntesis compare")
+#coef(lm(psn ~ cpool, data = thin)) # Calculate slope and intercept of line of best fit
+  a2 = a2 + geom_abline(intercept=0.0006,slope=0.0034, colour="black", size=1)
+a2
+```
+
+```{r}
+#how does Leaf Area and Non Structural Carbohydrate compare
+#scatter plot Leaf Area v/s Non Structural Carbohydrate
+a3=ggplot(thin, aes(x=cpool, y=lai))+geom_point(col="green", shape=1, size=rel(1))
+a3=a3+labs(x="Non Structural Carbohydrate", y="Leaf Area") 
+  a3 = a3+ ggtitle("How does Non Structural Carbohydrate and Leaf Area compare")
+#coef(lm(lai ~ cpool, data = thin)) # Calculate slope and intercept of line of best fit
+a3 = a3 + geom_abline(intercept=3.49,slope=1.46, colour="black", size=1)
+a3
+
+```
+
+```{r}
+#scatter plot Non Structural Carbohydrate v/s Transpiration
+a4=ggplot(thin, aes(x=cpool, y=trans))+geom_point(col="orange", shape=1, size=rel(1))
+#How does Non Structural Carbohydrate and Transpiration is compare
+a4=a4+labs(x="Non Structural Carbohydrate", y="Transpiration") 
+  a4 = a4+ ggtitle("How does Non Structural Carbohydrate and Transpiration compare")
+#coef(lm(trans ~ cpool, data = thin)) # Calculate slope and intercept of line of best fit
+  a4 = a4 + geom_abline(intercept=1.109,slope=0.914, colour="black", size=1)
+a4
+```
+
+```{r}
+#scatter plot Non Structural Carbohydrate v/s Evaporation
+a5=ggplot(thin, aes(x=cpool, y=evap))+geom_point(col="orange", shape=1, size=rel(1))
+#How does Non Structural Carbohydrate and Evaporation is compare
+a5=a5+labs(x="Non Structural Carbohydrate", y="Evaporation") 
+  a5 = a5+ ggtitle("How does Non Structural Carbohydrate and Evaporation compare")
+#coef(lm(evap ~ cpool, data = thin)) # Calculate slope and intercept of line of best fit
+  a5 = a5 + geom_abline(intercept=0.016,slope=0.08, colour="black", size=1)
+a5
+```
+
+```{r}
+grid.arrange(a1,a2,a3,a4,a5)
+```
+
+#Aesthetics, Lines: horizontal and vertical geom_vline: xintercept, geom_hline: yintercept
+
+
+```{r}
+
+p <- ggplot(thin, aes(x=as.factor(postyears), y=plantc)) + geom_point()
+p
+# Fixed values
+p + geom_vline(xintercept = 10)
+```
+
+```{r}
+p + geom_hline(yintercept = 2:6)
+```
+
+```{r}
+p + geom_hline(yintercept = 4)
+```
+
+```{r}
+p + geom_abline() # Can't see it - outside the range of the data
+p + geom_abline(intercept = 4)
+```
+
+
+#Copy examples from the class with thin data
+
+```{r}
+# basic plot
+z = ggplot(thin, aes(y=plantc, x=month))+geom_point()
 z
-bind_cols(y, z)
-```
-
-### `bind_rows`
-
-```{r bind_rows}
-y
+z = z + labs(y="Biomass (kgC/m2)", x="Month")
+zclr = z+theme(axis.text= element_text(face="bold", colour="blue", size=12))
 z
-bind_rows(y, z)
+zclr
+grid.arrange(z,zclr)
 ```
 
-### `union`
+```{r}
+# note the use of as factor (boxplot need factors to organize)
+z1=ggplot(thin, aes(y=plantc, x=as.factor(month)))+geom_boxplot(colour="blue", fill="yellow")
+z1=z1+labs(y="Biomass (kgC/m2)", x="Month")
+z1
 
-```{r union}
-y
+```
+
+
+```{r}
+# basic plot
+z = ggplot(thin, aes(y=evap, x=month))+geom_point()
 z
-union(y, z)
-```
-
-### `intersect`
-
-```{r intersect}
-y
+z = z + labs(y="Evaporation", x="Month")
+zclr = z+theme(axis.text= element_text(face="bold", colour="blue", size=14))
 z
-intersect(y, z) #only things in commom
+zclr
+grid.arrange(z,zclr)
 ```
 
-### `setdiff`
 
-```{r setdiff}
-y
-z
-setdiff(y, z)
+```{r}
+z2 = ggplot(thin, aes(x=year,y=evap))+stat_summary(fun.y="sum", geom="bar", col="blue")
+z2
 ```
 
-### `left_join`
+```{r}
+z2 = ggplot(thin, aes(x=as.factor(month),y=evap))+stat_summary(fun.y="mean", geom="bar")
 
-```{r left_join}
-songs = data.frame(
-  song = c('Across the Universe','Come Together', 'Hello, Goodbye', 'Peggy Sue'),
-  name = c('John','John','Paul','Buddy'), 
-  stringsAsFactors=F)
-artists = data.frame(
-  name = c('George','John','Paul','Ringo'),
-  plays = c('sitar','guitar','bass','drums'), 
-  stringsAsFactors=F)
-left_join(songs, artists, by='name')
+z2 = z2 + scale_x_discrete(labels=abbreviate) + labs(x="Months",y="Evaporation")
+z2
 ```
 
-### `inner_join`
-
-```{r inner_join}
-inner_join(songs, artists, by = "name")
+```{r}
+z2 = z2 + facet_wrap(~year)
+z2
 ```
 
-### `semi_join`
-
-```{r semi_join}
-semi_join(songs, artists, by = "name")
+```{r}
+z3 = z2 + theme(axis.text=element_blank(), strip.text = element_blank(), strip.background = element_blank())
+z3
 ```
 
-### `anti_join`
 
-```{r anti_join}
-anti_join(songs, artists, by = "name")
+```{r, echo=FALSE, warning=FALSE}
+suppressPackageStartupMessages({
+  library(readr)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(knitr)
+})
 ```
+
+
+#ggplot(data=co2_percapita, aes(y=n, x=Country))+stat_summary(fun.y="mean", geom="point") + labs(x="Time since thinning", y="Carbon Sequestration")
 
 ### per capita CO<sub>2</sub> emissions 
 
@@ -133,142 +288,123 @@ You'll join the [population](http://data.okfn.org/data/core/population) dataset 
 
 _**Task**. Calculate the per capita emissions by country (not World or EU28) and return the top 5 emitting countries for **2014**._
 
-```{r read co2 & popn}
-library(readr)
-library(readxl) # install.packages('readxl')
-library(dplyr)
-library(tidyr)
-library(httr)   # install.packages('httr')
-library(plyr)   # install.packages('plyr')
+_**Task**. Summarize the per capita emissions by country (not World or EU28) as the **mean** (ie average)  value across all years and return the top 5 emitting countries._ 
 
-print(getwd())
 
-# population Excel file
+```{r read co2 & popn, eval=T}
+suppressPackageStartupMessages({
+  library(readr)
+  library(readxl) # install.packages('readxl')
+  library(dplyr)
+  library(tidyr)
+  library(httr)   # install.packages('httr')
+  library(ggplot2)
+  library(knitr)
+})
+
+# co2 Excel file
 url = 'http://edgar.jrc.ec.europa.eu/news_docs/CO2_1970-2014_dataset_of_CO2_report_2015.xls'
-out = 'co2_europa.xls'
-if (!file.exists(out)) writeBin(content(GET(url), 'raw'), out)
-
-# country lookup csv file
-url = 'https://raw.githubusercontent.com/ucsb-bren/env-info/gh-pages/data/co2_country_to_popn.csv'
-out = 'co2_country_to_popn.csv'
-if (!file.exists(out)) writeBin(content(GET(url), 'raw'), out)
+xls = 'co2_europa.xls'
+if (!file.exists(xls)) writeBin(content(GET(url), 'raw'), xls)
 
 # read in carbon dioxide emissions file
-xls = 'co2_europa.xls'
-co2 = read_excel(xls, skip=12)
-# to match names use anti-join  
-
-# get lookup table to translate some country names in popn to those in co2 table
-cntry = read_csv('co2_country_to_popn.csv')
-
-# read in population and revalue some country names to match co2 table
-popn = read_csv('https://raw.githubusercontent.com/datasets/population/master/data/population.csv') %>%
-  select(country=`Country Name`, year=Year, popn=Value) %>%
-  mutate(
-    country = plyr::revalue( #revalue country with any matches between countries
-      country, 
-      setNames(cntry$country_co2, cntry$country_popn)))
-```
-
-###Getting emission's countries in 2014
-
-```{r gather}
+co2 = read_excel(xls, skip=12) %>%
+  gather(year, ktons_co2, -Country) %>%
+  filter(!Country %in% c('World','EU28') & !is.na(Country)) %>%
+  mutate(year = as.integer(as.character(year))) %>%
+  rename(country=Country)
 co2
-d = gather(co2, "year", "n", -1)
-d
-# Other way to do the same: gather(co2, "year", "n", 2:ncol(co2)) or gather(co2, "year", "n", -Country)
 
-#Converting my year column from factor to numeric
-
-e = mutate(d, year = as.numeric(as.character(year)))
-e
-
-new2 = filter(e, year > 2013)   # other way is new <- e[e$year == 2014,]
-
-new3 = arrange(new2, desc(n))
-
-co2_2014 = filter(new3, Country != c("World", "EU28"))
-
-head(co2_2014)
-
-```
-
-###Getting population's countries in 2014
-
-```{r}
-pop_2014 = filter(popn, year > 2013) 
-
-names(pop_2014)[1]<-paste("Country") #changing the name in the first column from "country" to "Country", that it will match with the co2_2014 for joinning purposes. 
-```
-
-```{r}
-Per_Capita = left_join(co2_2014, pop_2014, by = "Country")
-
-co2_percapita = mutate(Per_Capita, ratio = n / popn)
-
-arrange(co2_percapita, desc(ratio))
-
-head(co2_percapita)
-
-```
-
-```{r, echo=FALSE, warning=FALSE}
-
-suppressWarnings(suppressMessages(library(readr)))
-suppressWarnings(suppressMessages(library(dplyr)))
-suppressWarnings(suppressMessages(library(tidyr)))
-suppressWarnings(suppressMessages(library(ggplot2)))
-suppressWarnings(suppressMessages(library(knitr)))
-
-```
-
-```{r}
-ggplot(data=co2_percapita, aes(y=ratio, x=Country))+geom_point()
-```
-
-```{r}
-ggplot(data=co2_percapita, aes(y=n, x=Country))+geom_point()
-```
-
-_**Task**. Summarize the per capita emissions by country (not World or EU28) as the mean (ie average)  value across all years and return the top 5 emitting countries._ 
-
-```{r}
-e
-ee = filter(e, Country != c("World", "EU28"))
-
-names(popn)[1]<-paste("Country")
+# read in population
+popn = read_csv('https://raw.githubusercontent.com/datasets/population/master/data/population.csv') %>%
+  select(country=`Country Name`, year=Year, popn=Value) 
 popn
-
-allyears = left_join(ee, popn, by = c("Country", "year"))
-allyears
-
-pc_allyears = mutate(allyears, ratio = n / popn)
-pc_allyears
-
-n = pc_allyears %>% select(Country, ratio)
-
-n <- n[!is.na(n$ratio), ]
-
-n <- aggregate(n$ratio, by = list(n$Country), FUN = mean)
-names(n) <- c("Country", "mean")
-m = arrange(n, desc(mean))
-head(m)
-   
 ```
 
-#I tried dplyr but make me this error
+In order to calculate per capita emissions, you'll need to join the `popn` data frame with the `co2` data frame before calculating something like `ktons_co2 / popn`.
 
-> n %>% group_by(Country)%>%
-+ summarise(
-+ mean = mean(ratio))%>%
-+ write_csv("x")
-Error in mean(ratio) : object 'ratio' not found
-> head(x)
-Error in head(x) : object 'x' not found
+One of the trickiest parts about joining data is ensuring that values in the key columns are matching. The column `year` is a simple 4 digit integer in both tables (after converting to `as.integer()` for the gathered `co2`). But what about `country`?
 
-n %>% group_by(Country)%>% 
-  summarise(
-    mean = mean(ratio))%>% 
-    write_csv("x")
-    head(x)
- 
+Let's look at just `year==2014` to see what values of `country` in table `co2` are not found in table `popn`, ie `anti_join()`:
+
+```{r co2$popn not in popn$country, eval=T}
+# co2$popn not in popn$country
+co2 %>%
+  filter(year==2014) %>%
+  anti_join(
+    popn %>%
+      filter(year==2014),
+    by='country') %>%
+  arrange(desc(ktons_co2))
+```
+
+Whoah, we're missing 47 "countries", including the "United States of America"! So what is "United States of America" called in  `popn$country`?
+
+```{r popn$country not in co2$popn, eval=T}
+# popn$country not in co2$popn
+popn %>%
+  filter(year==2014) %>%
+  anti_join(
+    co2 %>%
+      filter(year==2014), 
+    by='country') %>%
+  arrange(desc(country))
+```
+
+Ok, so in `popn$country` we have "United States" which doesn't get matched with "United States of America" in `co2$country`? How to fix this? We need a lookup table for translating country values between tables. I went ahead and made one for you by copying the two anti_join tables above and matching rows where possible.
+
+```{r cntry, eval=T}
+# get lookup table to translate popn$country to co2$country
+cntry = read_csv('https://raw.githubusercontent.com/ucsb-bren/env-info/gh-pages/data/co2_country_to_popn.csv')
+cntry
+```
+
+So before we join the tables `co2` and `popn`, first translate country in one to match the other.
+
+```{r update co2$country to popn$country, eval=T}
+# update co2$country to popn$country
+co2_m = co2 %>%
+  left_join(
+    cntry, 
+    # note use of named vector to columns with different names
+    by = c('country'='country_co2')) %>%    
+  mutate(
+    # note use of ifelse to upated country with popn$country_popn
+    country = ifelse(!is.na(country_popn), country_popn, country))
+
+# check that "United States of America" changed to "United States"
+co2_m %>%
+  filter(year==2014) %>%  #why this is not working???? I did it again in next chuck  ???????
+  arrange(desc(country)) %>%
+  head(15)
+```
+
+Ok, so `co2_m$country` got updated with values to match `popn$country`, eg "United States of America" to "United States".
+
+Please use this matching `co2_m` to join with `popn` and calculate per capita emissions.
+
+
+```{r}
+
+co2_percapita = co2_m %>%
+  filter(year > 2013) %>%
+  filter(country != c("World", "EU28")) %>%
+  left_join(
+    popn, by = c("country", "year")) %>%
+  mutate(
+    ratio = ktons_co2 / popn) %>% 
+  select(country, ratio)
+
+#h1 = ggplot(data=co2_percapita, aes(y=ratio, x=country))+geom_point()+ labs(x="Country", y="ratio (CO2(metric tons) / population)")+ ggtitle("Emissions of CO2 per capita per country")
+#h1
+#h1 + ylim(0.02, 0.18)
+
+co2_percapita_0.02 = co2_percapita %>%
+  filter(ratio > 0.015)
+t = ggplot(data=co2_percapita_0.02, aes(y=ratio, x=country))+geom_point()+ labs(x="Country", y="ratio (CO2(metric tons) / population)")+ ggtitle("Emissions of CO2 per capita per country")
+t = t+theme_bw()
+t
+#how to fix country names vertical in axis x??????
+
+```
+

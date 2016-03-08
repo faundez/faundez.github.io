@@ -1,0 +1,9 @@
+name: test_shiny1
+account: faundez
+server: shinyapps.io
+appId: 85614
+bundleId: 390096
+url: https://faundez.shinyapps.io/test_shiny1/
+when: 1457420161.97438
+asMultiple: FALSE
+asStatic: FALSE

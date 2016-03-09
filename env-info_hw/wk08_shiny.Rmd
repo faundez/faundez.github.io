@@ -3,27 +3,18 @@ title: "wk08_shiny"
 author: "Patricia Faundez"
 date: "February 26, 2016"
 output: html_document
-runtime: shiny
+
 ---
 
-```{r, echo = FALSE}
-shinyApp(
-  
-  ui = fluidPage(
-    selectInput("region", "Region:", 
-                choices = colnames(WorldPhones)),
-    plotOutput("phonePlot")
-  ),
-  
-  server = function(input, output) {
-    output$phonePlot <- renderPlot({
-      barplot(WorldPhones[,input$region]*1000, 
-              ylab = "Number of Telephones", xlab = "Year")
-    })
-  },
-  
-  options = list(height = 500)
-)
+```{r, eval = FALSE}
+library(shiny)
+
+shiny::runGitHub("faundez.github.io", "faundez", subdir = "env-info_hw/census-app/")
 ```
 
+
+```{r echo = FALSE}
+
+shiny::runGitHub("fish-ecol.github.io", "fish-ecol", subdir = "Shiny-fish-ecol/")
+```
 

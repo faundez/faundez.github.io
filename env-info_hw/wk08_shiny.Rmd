@@ -29,3 +29,10 @@ shiny::runGitHub("fish-ecol.github.io", "fish-ecol", subdir = "Shiny-fish-ecol/"
 ### shinyapps URL
 
 <https://faundez.shinyapps.io/Shiny-fish-ecol/>
+
+##  Link to the shinyapps.io URL of the Shiny app that one of your group members published
+
+### shinyapps URL
+
+< https://faundez.shinyapps.io/iucn_map/>
+
